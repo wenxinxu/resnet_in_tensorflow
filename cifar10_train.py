@@ -1,7 +1,7 @@
 # Coder: Wenxin Xu
 # Github: https://github.com/wenxinxu/resnet_in_tensorflow
 # ==============================================================================
-
+import cv2
 from resnet import *
 from datetime import datetime
 import time
@@ -43,7 +43,7 @@ class Train(object):
     def build_train_validation_graph(self):
         '''
         This function builds the train graph and validation graph at the same time.
-        
+
         '''
         global_step = tf.Variable(0, trainable=False)
         validation_step = tf.Variable(0, trainable=False)
@@ -422,7 +422,3 @@ maybe_download_and_extract()
 train = Train()
 # Start the training session
 train.train()
-
-
-
-
