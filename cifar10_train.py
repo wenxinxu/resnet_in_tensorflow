@@ -93,7 +93,9 @@ class Train(object):
         saver = tf.train.Saver(tf.global_variables())
         summary_op = tf.summary.merge_all()
         init = tf.initialize_all_variables()
-        sess = tf.Session()
+        config = tf.ConfigProto(allow_soft_placement = True)
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
 
 
         # If you want to load from a checkpoint
@@ -227,7 +229,10 @@ class Train(object):
 
         # Initialize a new session and restore a checkpoint
         saver = tf.train.Saver(tf.all_variables())
-        sess = tf.Session()
+        
+        config = tf.ConfigProto(allow_soft_placement = True)
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
 
         saver.restore(sess, FLAGS.test_ckpt_path)
         print 'Model restored from ', FLAGS.test_ckpt_path
@@ -421,8 +426,26 @@ maybe_download_and_extract()
 # Initialize the Train object
 train = Train()
 # Start the training session
-train.train()
+#train.train()
 
+write_file = open("predict_ret.txt", "w+")
+test_image_array,test_labels = read_validation_data() # Better to be whitened in advance. Shape = [-1, img_height, img_width, img_depth]
+predictions = train.test(test_image_array)
 
+accuracy,cnt = 0,0
 
+for i in range(len(predictions)):
+    top1_predicted_label = np.argmax(predictions[i])
 
+    true_label = int(test_labels[i])
+
+    write_file.write('{}, {}, {}, {}\n'.format(
+        true_label,
+        predictions[i][true_label],
+        top1_predicted_label,
+        predictions[i][top1_predicted_label]))
+    cnt += 1
+    if true_label==top1_predicted_label:
+        accuracy += 1
+print("done!")
+print("Test Accuracy={}".format(float(accuracy)/float(cnt)))
