@@ -93,7 +93,9 @@ class Train(object):
         saver = tf.train.Saver(tf.global_variables())
         summary_op = tf.summary.merge_all()
         init = tf.initialize_all_variables()
-        sess = tf.Session()
+        config = tf.ConfigProto(allow_soft_placement = True)
+        config.gpu_options.allow_growth = True
+        sess = tf.Session(config=config)
 
 
         # If you want to load from a checkpoint
@@ -202,66 +204,6 @@ class Train(object):
                 df = pd.DataFrame(data={'step':step_list, 'train_error':train_error_list,
                                 'validation_error': val_error_list})
                 df.to_csv(train_dir + FLAGS.version + '_error.csv')
-
-
-    def test(self, test_image_array):
-        '''
-        This function is used to evaluate the test data. Please finish pre-precessing in advance
-
-        :param test_image_array: 4D numpy array with shape [num_test_images, img_height, img_width,
-        img_depth]
-        :return: the softmax probability with shape [num_test_images, num_labels]
-        '''
-        num_test_images = len(test_image_array)
-        num_batches = num_test_images // FLAGS.test_batch_size
-        remain_images = num_test_images % FLAGS.test_batch_size
-        print '%i test batches in total...' %num_batches
-
-        # Create the test image and labels placeholders
-        self.test_image_placeholder = tf.placeholder(dtype=tf.float32, shape=[FLAGS.test_batch_size,
-                                                        IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH])
-
-        # Build the test graph
-        logits = inference(self.test_image_placeholder, FLAGS.num_residual_blocks, reuse=False)
-        predictions = tf.nn.softmax(logits)
-
-        # Initialize a new session and restore a checkpoint
-        saver = tf.train.Saver(tf.all_variables())
-        sess = tf.Session()
-
-        saver.restore(sess, FLAGS.test_ckpt_path)
-        print 'Model restored from ', FLAGS.test_ckpt_path
-
-        prediction_array = np.array([]).reshape(-1, NUM_CLASS)
-        # Test by batches
-        for step in range(num_batches):
-            if step % 10 == 0:
-                print '%i batches finished!' %step
-            offset = step * FLAGS.test_batch_size
-            test_image_batch = test_image_array[offset:offset+FLAGS.test_batch_size, ...]
-
-            batch_prediction_array = sess.run(predictions,
-                                        feed_dict={self.test_image_placeholder: test_image_batch})
-
-            prediction_array = np.concatenate((prediction_array, batch_prediction_array))
-
-        # If test_batch_size is not a divisor of num_test_images
-        if remain_images != 0:
-            self.test_image_placeholder = tf.placeholder(dtype=tf.float32, shape=[remain_images,
-                                                        IMG_HEIGHT, IMG_WIDTH, IMG_DEPTH])
-            # Build the test graph
-            logits = inference(self.test_image_placeholder, FLAGS.num_residual_blocks, reuse=True)
-            predictions = tf.nn.softmax(logits)
-
-            test_image_batch = test_image_array[-remain_images:, ...]
-
-            batch_prediction_array = sess.run(predictions, feed_dict={
-                self.test_image_placeholder: test_image_batch})
-
-            prediction_array = np.concatenate((prediction_array, batch_prediction_array))
-
-        return prediction_array
-
 
 
     ## Helper functions
@@ -422,7 +364,4 @@ maybe_download_and_extract()
 train = Train()
 # Start the training session
 train.train()
-
-
-
 
