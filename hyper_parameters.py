@@ -20,7 +20,7 @@ moving average shown on tensorboard''')
 tf.app.flags.DEFINE_integer('train_steps', 80000, '''Total steps that you want to train''')
 tf.app.flags.DEFINE_boolean('is_full_validation', False, '''Validation w/ full validation set or
 a random batch''')
-tf.app.flags.DEFINE_integer('train_batch_size', 256, '''Train batch size''')
+tf.app.flags.DEFINE_integer('train_batch_size', 128, '''Train batch size''')
 tf.app.flags.DEFINE_integer('validation_batch_size', 250, '''Validation batch size, better to be
 a divisor of 10000 for this task''')
 tf.app.flags.DEFINE_integer('test_batch_size', 125, '''Test batch size''')
@@ -34,7 +34,7 @@ tf.app.flags.DEFINE_integer('decay_step1', 60000, '''At which step to decay the 
 
 ## The following flags define hyper-parameters modifying the training network
 
-tf.app.flags.DEFINE_integer('num_residual_blocks', 5, '''How many residual blocks do you want''')
+tf.app.flags.DEFINE_integer('num_residual_blocks', 10, '''How many residual blocks do you want''')
 tf.app.flags.DEFINE_float('weight_decay', 0.0002, '''scale for l2 regularization''')
 
 
@@ -51,7 +51,7 @@ directory to restore''')
 tf.app.flags.DEFINE_boolean('is_use_ckpt', False, '''Whether to load a checkpoint and continue
 training''')
 
-tf.app.flags.DEFINE_string('test_ckpt_path', './logs_test_1/model.ckpt-60000', '''Checkpoint
+tf.app.flags.DEFINE_string('test_ckpt_path', './logs_test_1/model.ckpt-79999', '''Checkpoint
 directory to restore''')
 
 
